@@ -5,14 +5,16 @@ import com.itservice.incidentresolution.dataccesslayer.TicketRepository;
 import com.itservice.incidentresolution.datamappinglayer.ResolutionStepMapper;
 import com.itservice.incidentresolution.domain.ResolutionStep;
 import com.itservice.incidentresolution.domain.StepIdentifier;
+import com.itservice.incidentresolution.domain.Ticket;
+import com.itservice.incidentresolution.domain.TicketStatus;
 import com.itservice.incidentresolution.presentationlayer.ResolutionStepRequestDTO;
 import com.itservice.incidentresolution.presentationlayer.ResolutionStepResponseDTO;
 import com.itservice.incidentresolution.utilities.ResolutionStepNotFoundException;
+import com.itservice.incidentresolution.utilities.TicketAlreadyClosedException;
 import com.itservice.incidentresolution.utilities.TicketNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,20 +30,17 @@ public class ResolutionStepServiceImpl implements ResolutionStepService {
     private final ResolutionStepMapper resolutionStepMapper;
 
     @Override
-    @Transactional(readOnly = true)
     public List<ResolutionStepResponseDTO> getAllResolutionSteps() {
         return this.resolutionStepMapper.toResponseDTOList(this.resolutionStepRepository.findAll());
     }
 
     @Override
-    @Transactional(readOnly = true)
     public ResolutionStepResponseDTO getResolutionStepById(String stepId) {
         ResolutionStep resolutionStep = findStepOrThrow(stepId);
         return this.resolutionStepMapper.toResponseDTO(resolutionStep);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ResolutionStepResponseDTO> getResolutionStepsByTicketId(String ticketId) {
         if (!this.ticketRepository.existsByTicketIdentifier_TicketId(ticketId)) {
             throw new TicketNotFoundException("Ticket with id " + ticketId + " not found");
@@ -53,10 +52,13 @@ public class ResolutionStepServiceImpl implements ResolutionStepService {
     }
 
     @Override
-    @Transactional
     public ResolutionStepResponseDTO createResolutionStep(String ticketId, ResolutionStepRequestDTO resolutionStepRequestDTO) {
-        if (!this.ticketRepository.existsByTicketIdentifier_TicketId(ticketId)) {
+        Optional<Ticket> ticketOptional = this.ticketRepository.findTicketByTicketIdentifier_TicketId(ticketId);
+        if (ticketOptional.isEmpty()) {
             throw new TicketNotFoundException("Ticket with id " + ticketId + " not found");
+        }
+        if (ticketOptional.get().getStatus() == TicketStatus.CLOSED) {
+            throw new TicketAlreadyClosedException("Ticket with id " + ticketId + " is already closed");
         }
 
         ResolutionStep resolutionStep = this.resolutionStepMapper.toEntity(resolutionStepRequestDTO);
@@ -69,7 +71,6 @@ public class ResolutionStepServiceImpl implements ResolutionStepService {
     }
 
     @Override
-    @Transactional
     public void deleteResolutionStep(String stepId) {
         ResolutionStep resolutionStep = findStepOrThrow(stepId);
         this.resolutionStepRepository.delete(resolutionStep);

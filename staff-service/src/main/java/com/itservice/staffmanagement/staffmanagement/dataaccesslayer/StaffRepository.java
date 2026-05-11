@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface StaffRepository extends JpaRepository<Staff, String> {
+public interface StaffRepository extends JpaRepository<Staff, Long> {
 Staff findByStaffIdentifier_StaffId(String staffId);
 
     Staff getStaffByStaffIdentifier_StaffId(String staffIdentifierStaffId);

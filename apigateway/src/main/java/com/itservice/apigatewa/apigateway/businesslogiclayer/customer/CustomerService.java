@@ -67,6 +67,6 @@ public class CustomerService {
         Link self = linkTo(methodOn(CustomerController.class).getCustomerById(customerResponseDTO.getCustomerId())).withSelfRel();
 //        Link all
         Link all = linkTo(methodOn(CustomerController.class).getAll()).withRel("All customers");
-        return customerResponseDTO.add(all);
+        return customerResponseDTO.add(all, self);
     }
 }

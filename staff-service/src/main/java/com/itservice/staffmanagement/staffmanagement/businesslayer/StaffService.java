@@ -66,7 +66,11 @@ public class StaffService {
             throw new NotFoundException("Staff id is null: " + staffId);
         }
 
-        staffRepository.deleteById(staffId);
+        Staff staff = staffRepository.getStaffByStaffIdentifier_StaffId(staffId);
+        if (staff == null) {
+            throw new NotFoundException("Staff not found "+staffId);
+        }
+        staffRepository.delete(staff);
     }
 }
 

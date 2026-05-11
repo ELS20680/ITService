@@ -66,6 +66,6 @@ private final CustomerMapper customerMapper;
         if(customer == null) {
             throw new NotFoundException("Customer not found : "+customerId);
         }
-        customerRepository.deleteCustomerByCustomerIdentifier_CustomerId(customerId);
+        customerRepository.delete(customer);
     }
 }

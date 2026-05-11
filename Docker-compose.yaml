@@ -14,44 +14,40 @@ services:
       - staff-service
       - incident-service
 
-  swagger-ui:
-    image: swaggerapi/swagger-ui
-    ports:
-      - "8084:8080"
-    environment:
-      - API_URL=http://api-gateway:8080/v3/api-docs
-    depends_on:
-      - apigateway
-
-
-#  # sales-service will use port 80884
-#  sales-service:
-#    build: sales-service
-#    hostname: sales-service
-#    ports:
-#      - "8084:8080"                                 # Map the container port to the host port - 8084
-#    environment:
-#      - SPRING_PROFILES_ACTIVE=docker
-#    depends_on:
-#      - mongodb
-#      - customer-service
-#      - employees-service
-#      - inventories-service
-
-
-
-
-
-
   incident-service:
     build: incident-service
     hostname: incident-service
     container_name: incident-service
-    ports:
-      - "8085:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      mongodb-incident:
+        condition: service_healthy
 
+  mongodb-incident:
+    image: mongo:6.0
+    hostname: mongodb-incident
+    container_name: mongodb-incident
+    volumes:
+      - ./data/mongodb-incident:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mongo-express-incident:
+    image: mongo-express:1.0.2
+    container_name: mongo-express-incident
+    hostname: mongo-express-incident
+    restart: always
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongodb-incident
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_BASICAUTH=false
+    depends_on:
+      mongodb-incident:
+        condition: service_healthy
 
 
 
@@ -59,8 +55,6 @@ services:
     build: customer-service
     hostname: customer-service
     container_name: customer-service
-    ports:
-      - "8081:8080"                                 # Map the container port to the host port - 8081
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
@@ -68,11 +62,9 @@ services:
         condition: service_healthy
 
   mysql1:
-    image: mysql:5.7
+    image: mysql:8.0
     hostname: mysql1
     container_name: mysql1-customer
-    ports:
-      - "3307:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=rootpwd
       - MYSQL_DATABASE=customer-db
@@ -103,8 +95,6 @@ services:
     links:
       - mysql1
     restart: always
-    ports:
-      - 5013:80
     environment:
       - PMA_ARBITRARY=1
 
@@ -118,8 +108,6 @@ services:
     build: staff-service
     hostname: staff-service
     container_name: staff-service
-    ports:
-      - "8082:8080"                                 # Map the container port to the host port - 8082
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
@@ -127,11 +115,9 @@ services:
         condition: service_healthy
 
   mysql2:
-    image: mysql:5.7
+    image: mysql:8.0
     hostname: mysql2
     container_name: mysql2-staff
-    ports:
-      - "3308:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=rootpwd
       - MYSQL_DATABASE=staff-db
@@ -162,8 +148,6 @@ services:
     links:
       - mysql2
     restart: always
-    ports:
-      - 5014:80
     environment:
       - PMA_ARBITRARY=1
 
@@ -174,8 +158,6 @@ services:
     build: asset-service
     hostname: asset-service
     container_name: asset-service
-    ports:
-      - "8083:8080"                                 # Map the container port to the host port - 8083
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
@@ -191,8 +173,6 @@ services:
       - PGUSER=user                     #need this to avoid fatal error no role ROOT found
       - POSTGRES_PASSWORD=pwd
       - POSTGRES_DB=asset-db      #must match what's in the application.yml url
-    ports:
-      - "5432:5432"
     healthcheck:
       test: "pg_isready -h postgres1"
       interval: 10s
@@ -204,9 +184,7 @@ services:
     container_name: pgadmin-asset
     restart: always
     environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@ionascu.com  #needed to login to pgadmin at localhost:9000
-      - PGADMIN_DEFAULT_PASSWORD=admin          #needed to login to pgadmin at localhost:9000
-    ports:
-      - 9000:80
+      - PGADMIN_DEFAULT_EMAIL=admin@ionascu.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
     depends_on:
       - postgres1

@@ -17,7 +17,6 @@ import com.itservice.incidentresolution.utilities.TicketNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +35,6 @@ public class TicketServiceImpl implements TicketService {
     private final AssetDomainClient assetDomainClient;
 
     @Override
-    @Transactional(readOnly = true)
     public List<TicketResponseDTO> getAllTickets() {
         List<Ticket> tickets = this.ticketRepository.findAll();
         List<TicketResponseDTO> responses = new ArrayList<>();
@@ -49,14 +47,12 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public TicketResponseDTO getByTicketId(String ticketId) {
         Ticket ticket = findTicketOrThrow(ticketId);
         return buildTicketResponse(ticket);
     }
 
     @Override
-    @Transactional
     public TicketResponseDTO createTicket(TicketRequestDTO ticketRequestDTO) {
         CustomerResponseDTO customerResponseDTO = this.customerDomainClient.getCustomerById(ticketRequestDTO.getCustomerId());
         StaffResponseDTO staffResponseDTO = this.staffDomainClient.getStaffById(ticketRequestDTO.getStaffId());
@@ -70,7 +66,6 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    @Transactional
     public TicketResponseDTO updateTicket(String ticketId, TicketRequestDTO ticketRequestDTO) {
         Ticket foundTicket = findTicketOrThrow(ticketId);
 
@@ -86,7 +81,6 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    @Transactional
     public void deleteTicket(String ticketId) {
         Ticket foundTicket = findTicketOrThrow(ticketId);
         this.resolutionStepRepository.deleteByTicketId(ticketId);

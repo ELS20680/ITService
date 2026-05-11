@@ -7,8 +7,6 @@ logging:
   level:
     root: INFO
     com.itservice: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 spring:
   application:
@@ -16,27 +14,11 @@ spring:
   config:
     activate:
       on-profile: default
-  datasource:
-    url: jdbc:h2:mem:incident-db;DB_CLOSE_DELAY=-1;NON_KEYWORDS=YEAR
-    driver-class-name: org.h2.Driver
-    username: user
-    password: pwd
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: create-drop
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
-        auto-quote-keyword: true
-        format_sql: true
-    defer-datasource-initialization: true
-  h2:
-    console:
-      enabled: true
-      path: /h2
-      settings:
-        web-allow-others: true
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: incident-db
 
 microservices:
   customer-service:
@@ -56,20 +38,11 @@ spring:
   config:
     activate:
       on-profile: docker
-  datasource:
-    url: jdbc:h2:mem:incident-db;DB_CLOSE_DELAY=-1;NON_KEYWORDS=YEAR
-    driver-class-name: org.h2.Driver
-    username: user
-    password: pwd
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: create-drop
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
-        auto-quote-keyword: true
-        format_sql: true
+  data:
+    mongodb:
+      host: mongodb-incident
+      port: 27017
+      database: incident-db
 
 microservices:
   customer-service:
@@ -84,23 +57,15 @@ spring:
   config:
     activate:
       on-profile: testing-profile
-  datasource:
-    url: jdbc:h2:mem:incident-db;DB_CLOSE_DELAY=-1;NON_KEYWORDS=YEAR
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: create-drop
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
-        auto-quote-keyword: true
-    defer-datasource-initialization: true
-  h2:
-    console:
-      enabled: true
+  data:
+    mongodb:
+      database: incident-db-test
+
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 7.0.5
 
 microservices:
   customer-service:

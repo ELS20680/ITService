@@ -64,6 +64,6 @@ public class StaffService {
     private StaffResponseDTO addLinks(StaffResponseDTO staffResponseDTO) {
         Link self = linkTo(methodOn(StaffController.class).getStaffById(staffResponseDTO.getStaffId())).withSelfRel();
         Link all = linkTo(methodOn(StaffController.class).getAll()).withRel("All staff");
-        return staffResponseDTO.add(all);
+        return staffResponseDTO.add(all, self);
     }
 }
