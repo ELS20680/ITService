@@ -1,0 +1,59 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.5.4'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.itservice.staffmanagement'
+version = '1.0.0-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-hateoas'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+
+//    runtimeOnly 'com.mysql:mysql-connector-j'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+// This provides @Entity, @Table, @Id, and JPA Repository support
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+// You also need a database driver to go with it (like H2 for this activity)
+	runtimeOnly 'com.h2database:h2'
+//	implementation 'org.springframework.boot:spring-boot-h2console'
+	// Add MySQL connector
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+// Jakarta Validation API
+	implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+
+	// Hibernate Validator (Reference Implementation)
+	implementation 'org.hibernate.validator:hibernate-validator:8.0.1.Final'
+
+	// Lombok Configuration
+	compileOnly 'org.projectlombok:lombok'
+
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// Optional: Also enable Lombok for your Unit Tests
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

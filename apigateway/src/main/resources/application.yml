@@ -1,0 +1,59 @@
+# Default Spring Profile
+server:
+  error:
+    include-message: always
+
+logging:
+  level:
+    root: INFO
+    com.itservice: DEBUG
+
+server.port: 8086
+
+app:
+  customer-service:
+    host: localhost
+    port: 7001            #must match server.port defined in h2 profile in application.yml of customers-service
+  staff-service:
+    host: localhost
+    port: 7002
+  asset-service:
+    host: localhost
+    port: 7003
+  incident-service:
+    host: localhost
+    port: 7004
+#  sales-service:
+#    host: localhost
+#    port: 7004
+
+
+---
+#docker
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+server.port: 8080
+
+app:
+  customer-service:
+    host: customer-service   #must match Docker host name
+    port: 8080
+  staff-service:
+    host: staff-service
+    port: 8080
+  asset-service:
+    host: asset-service
+    port: 8080
+  incident-service:
+    host: incident-service
+    port: 8080
+#    aggregate
+#  sales-service:
+#    host: sales-service
+#    port: 8080
+
+springdoc:
+  enable-hateoas: false

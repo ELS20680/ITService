@@ -1,0 +1,76 @@
+# Default Spring Profile
+server:
+  error:
+    include-message: always
+
+logging:
+  level:
+    root: INFO
+    com.itservice: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+server.port: 7003
+
+---
+
+#for h2
+spring:
+  config:
+    activate:
+      on-profile: h2
+
+  h2:
+    console:
+      enabled: true
+
+  datasource:
+    url: jdbc:h2:mem:asset-db;DB_CLOSE_DELAY=-1;?createDatabaseIfNotExist=true
+    driver-class-name: org.h2.Driver
+    username: user
+    password: pwd
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop   #use create to allow jpa to auto-generate from Entity classes; use none to use schema.sql
+
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      platform: h2
+      mode: always
+
+
+
+---
+
+# for docker
+
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+
+  datasource:
+    url: jdbc:postgresql://postgres1/asset-db?createDatabaseIfNotExist=true
+    username: user
+    password: pwd
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop   #use create to allow jpa to auto-generate from Entity classes; use none to use schema.sql
+
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      platform: psql
+      mode: always
+
+server.port: 8080
+
+spring.datasource.hikari.initializationFailTimeout: 60000

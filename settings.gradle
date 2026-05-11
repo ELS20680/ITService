@@ -1,0 +1,5 @@
+include 'asset-service'
+include 'customer-service'
+include 'incident-service'
+include 'staff-service'
+include 'apigateway'

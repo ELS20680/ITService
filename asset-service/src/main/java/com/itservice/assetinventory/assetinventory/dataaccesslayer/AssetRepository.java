@@ -1,0 +1,10 @@
+package com.itservice.assetinventory.assetinventory.dataaccesslayer;
+
+import com.itservice.assetinventory.assetinventory.domain.Asset;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface AssetRepository extends JpaRepository<Asset, String> {
+    Asset findAssetByAssetIdentifier_AssetId(String assetId);
+}

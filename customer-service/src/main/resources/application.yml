@@ -1,0 +1,165 @@
+# This is a Spring Boot configuration file in YAML format.
+# It defines settings for the application, particularly for the "prod" profile.
+# Server configuration
+server:
+  port: 8080  # The port on which the application will run.
+  #    servlet:
+  #        context-path: /api  # The base path for all endpoints in the application.
+  error:
+    include-message: always
+# Logging configuration
+logging:
+  level:
+    root: INFO  # Default logging level for the application.
+    org.springframework.web: DEBUG  # Debug-level logging for Spring web components.
+    com.champsoft: TRACE  # Trace-level logging for a specific package (e.g., com.example).
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+# Spring configuration  for  "default" profile
+spring:
+  # Application-specific settings
+  application:
+    # The name of the application. Used for identification in logs and monitoring tools.
+    name: service-requester-service
+  config:
+    activate:
+      on-profile: default
+  # DataSource configuration for connecting to the database
+  datasource:
+    # JDBC URL for connecting to the MySQL database.
+    # Specifies the database type (mysql), host (localhost), port (3306),
+    # and database name (cardealership-db).
+    # url: jdbc:mysql://localhost:3306/cardealership-db  # use this or the next statement
+    url: jdbc:h2:mem:customer-db;DB_CLOSE_DELAY=-1;NON_KEYWORDS=YEAR
+    # Database username for authentication.
+    username: user
+    # Database password for authentication.
+    password: pwd
+    # JDBC driver class for MySQL. This is required for connecting to MySQL databases.
+    driver-class-name: org.h2.Driver
+
+
+  # JPA (Java Persistence API) configuration for database interaction
+  jpa:
+    # Hibernate-specific settings
+    hibernate:
+      # Hibernate schema generation mode.
+      # "none" means no schema changes are made automatically.
+      # Other options include "create", "update", "validate", etc.
+      ddl-auto: create-drop         #let jpa create the schema
+    # Whether to log SQL statements to the console. Useful for debugging.
+    show-sql: true
+    # Additional properties for Hibernate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        auto-quote-keyword: true
+        # Whether to format SQL statements in logs for better readability.
+        format_sql: true
+    defer-datasource-initialization: true
+  # SQL initialization settings
+  sql:
+    init:
+      # Specifies the database platform (PostGres in this case).
+      platform: h2
+      # Spring Boot will look for files named schema-mysql.sql and data-mysql.sql
+      # rather than the generic schema-mysql.sql and data-mysql.sql.
+      # Specifies when to initialize the database.
+      # "always" means SQL scripts will always be executed on startup.
+      mode: always
+      data-locations: classpath:data-h2.sql
+  h2:
+    console:
+      enabled: true
+      path: /h2
+      settings:
+        web-allow-others: true
+
+---
+# Spring configuration  for  "Docker" profile
+spring:
+  # Application-specific settings
+  application:
+    # The name of the application. Used for identification in logs and monitoring tools.
+    name: service-requester-service
+  config:
+    activate:
+      on-profile: docker
+  # DataSource configuration for connecting to the database
+  datasource:
+    # JDBC URL for connecting to the MySQL database.
+    # Specifies the database type (mysql), host (localhost), port (3306), and database name (cardealership-db).
+    # url: jdbc:mysql://localhost:3306/cardealership-db  # use this or the next statement
+    url: jdbc:mysql://mysql1/customer-db?createDatabaseIfNotExist=true
+    # Database username for authentication.
+    username: user
+    # Database password for authentication.
+    password: pwd
+    # JDBC driver class for MySQL. This is required for connecting to MySQL databases.
+    driver-class-name:
+
+  # JPA (Java Persistence API) configuration for database interaction
+  jpa:
+    # Hibernate-specific settings
+    hibernate:
+      # Hibernate schema generation mode.
+      # "none" means no schema changes are made automatically.
+      # Other options include "create", "update", "validate", etc.
+      ddl-auto: create
+    defer-datasource-initialization: true
+    # Whether to log SQL statements to the console. Useful for debugging.
+    show-sql: true
+    # Additional properties for Hibernate
+    properties:
+      hibernate:
+        # Whether to format SQL statements in logs for better readability.
+        format_sql: true
+    database-platform: org.hibernate.dialect.MySQLDialect
+
+  # SQL initialization settings
+  sql:
+    init:
+      # Specifies the database platform (MySQL in this case).
+      platform: mysql
+      # Spring Boot will look for files named schema-mysql.sql and data-mysql.sql
+      # rather than the generic schema-mysql.sql and data-mysql.sql.
+      # Specifies when to initialize the database.
+      # "always" means SQL scripts will always be executed on startup.
+      mode: always
+      data-locations: classpath:data-mysql.sql
+
+---
+#for h2
+spring:
+  config:
+    activate:
+      on-profile: testing-profile
+  h2:
+    console:
+      enabled: true
+  datasource:
+    url: jdbc:h2:mem:service-requester-db;DB_CLOSE_DELAY=-1;NON_KEYWORDS=YEAR
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop         #let jpa create the schema
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        auto-quote-keyword: true
+    defer-datasource-initialization: true  #turn this on to ensure that hibernate initializes the schema before loading the data
+  sql:
+    init:
+      platform: h2
+      mode: embedded
+
+
+
+
+
+
+
+

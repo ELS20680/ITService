@@ -1,0 +1,212 @@
+services:
+  # api-gateway will use port 8080
+  apigateway:
+    build: apigateway
+    hostname: apigateway
+    container_name: apigateway
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - customer-service
+      - asset-service
+      - staff-service
+      - incident-service
+
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    ports:
+      - "8084:8080"
+    environment:
+      - API_URL=http://api-gateway:8080/v3/api-docs
+    depends_on:
+      - apigateway
+
+
+#  # sales-service will use port 80884
+#  sales-service:
+#    build: sales-service
+#    hostname: sales-service
+#    ports:
+#      - "8084:8080"                                 # Map the container port to the host port - 8084
+#    environment:
+#      - SPRING_PROFILES_ACTIVE=docker
+#    depends_on:
+#      - mongodb
+#      - customer-service
+#      - employees-service
+#      - inventories-service
+
+
+
+
+
+
+  incident-service:
+    build: incident-service
+    hostname: incident-service
+    container_name: incident-service
+    ports:
+      - "8085:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+
+
+
+  customer-service:
+    build: customer-service
+    hostname: customer-service
+    container_name: customer-service
+    ports:
+      - "8081:8080"                                 # Map the container port to the host port - 8081
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      mysql1:
+        condition: service_healthy
+
+  mysql1:
+    image: mysql:5.7
+    hostname: mysql1
+    container_name: mysql1-customer
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpwd
+      - MYSQL_DATABASE=customer-db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=pwd
+    volumes:
+      - ./data/mysql1:/var/lib/mysql1
+      - ./data/init.d:/docker-entrypoint-initdb.d
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-uuser",
+          "-ppwd",
+          "-h",
+          "localhost",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  phpmyadmin1:
+    image: phpmyadmin:5.2.0
+    container_name: phpmyadmin1-customer
+    hostname: phpmyadmin1
+    links:
+      - mysql1
+    restart: always
+    ports:
+      - 5013:80
+    environment:
+      - PMA_ARBITRARY=1
+
+
+
+
+
+
+
+  staff-service:
+    build: staff-service
+    hostname: staff-service
+    container_name: staff-service
+    ports:
+      - "8082:8080"                                 # Map the container port to the host port - 8082
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      mysql2:
+        condition: service_healthy
+
+  mysql2:
+    image: mysql:5.7
+    hostname: mysql2
+    container_name: mysql2-staff
+    ports:
+      - "3308:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpwd
+      - MYSQL_DATABASE=staff-db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=pwd
+    volumes:
+      - ./data/mysql2:/var/lib/mysql2
+      - ./data/init.d:/docker-entrypoint-initdb.d
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-uuser",
+          "-ppwd",
+          "-h",
+          "localhost",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  phpmyadmin2:
+    image: phpmyadmin:5.2.0
+    container_name: phpmyadmin2-staff
+    hostname: phpmyadmin2
+    links:
+      - mysql2
+    restart: always
+    ports:
+      - 5014:80
+    environment:
+      - PMA_ARBITRARY=1
+
+
+
+
+  asset-service:
+    build: asset-service
+    hostname: asset-service
+    container_name: asset-service
+    ports:
+      - "8083:8080"                                 # Map the container port to the host port - 8083
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      postgres1:
+        condition: service_healthy
+
+  postgres1:
+    image: postgres:latest              #as of April 7, 2025, latest version is PostgreSQL 17.4
+    container_name: postgres1-asset
+    hostname: postgres1
+    environment:
+      - POSTGRES_USER=user
+      - PGUSER=user                     #need this to avoid fatal error no role ROOT found
+      - POSTGRES_PASSWORD=pwd
+      - POSTGRES_DB=asset-db      #must match what's in the application.yml url
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: "pg_isready -h postgres1"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin-asset
+    restart: always
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@ionascu.com  #needed to login to pgadmin at localhost:9000
+      - PGADMIN_DEFAULT_PASSWORD=admin          #needed to login to pgadmin at localhost:9000
+    ports:
+      - 9000:80
+    depends_on:
+      - postgres1
